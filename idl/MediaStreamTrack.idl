@@ -124,6 +124,11 @@ namespace org
       /// </summary>
       [getter, setter]
       MediaElement element;
+      
+      /// <summary>
+      ///  This method resets the mediasource
+      /// </summary>
+      void resetSource();
 
       /// <summary>
       /// Event indicates when the MediaSource changes and needs to be reattached to a rendering MediaElement.

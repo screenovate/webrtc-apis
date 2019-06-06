@@ -256,6 +256,11 @@ void wrapper::impl::org::webRtc::MediaStreamTrack::set_element(wrapper::org::web
   autoAttachSourceToElement();
 }
 
+void wrapper::impl::org::webRtc::MediaStreamTrack::resetSource() noexcept {
+  zsLib::AutoLock lock(lock_);
+  refreshSource_ = true;
+}
+
 //------------------------------------------------------------------------------
 void wrapper::impl::org::webRtc::MediaStreamTrack::wrapper_onObserverCountChanged(size_t count) noexcept
 {
@@ -407,10 +412,10 @@ void WrapperImplType::notifyWebrtcObserverFrame(const ::webrtc::VideoFrame& fram
     }
   }
 
-  if (frameType != currentFrameType_ || !firstFrameReceived_) {
+  if (frameType != currentFrameType_ || !firstFrameReceived_ || refreshSource_) {
     {
       zsLib::AutoLock lock(lock_);
-
+      refreshSource_ = false;
       firstFrameReceived_ = true;
       currentFrameType_ = frameType;
       mediaStreamSource_ = UseMediaStreamSource::create(UseMediaStreamSource::CreationProperties{ frameType });
@@ -430,10 +435,10 @@ void WrapperImplType::notifyWebrtcObserverFrame(const ::webrtc::VideoFrame& fram
   auto wrapperEvent = UseVideoFrameBufferEvent::toWrapper(wrapperBuffer);
 
   auto pThis = thisWeak_.lock();
-
-  videoFrameProcessingQueue_->postClosure([pThis, wrapperEvent]() {
-    pThis->onVideoFrame(wrapperEvent);
-  });
+  if (videoFrameProcessingQueue_) {
+    videoFrameProcessingQueue_->postClosure(
+        [pThis, wrapperEvent]() { pThis->onVideoFrame(wrapperEvent); });
+  }
 }
 
 //------------------------------------------------------------------------------
