@@ -135,6 +135,7 @@ namespace wrapper {
 
           UseVideoFrameType currentFrameType_{};
           bool firstFrameReceived_ { false };
+          bool refreshSource_{false};
 
           MediaStreamTrackWeakPtr thisWeak_;
 
@@ -152,6 +153,7 @@ namespace wrapper {
           wrapper::org::webRtc::MediaSourcePtr get_source() noexcept override;
           wrapper::org::webRtc::MediaElementPtr get_element() noexcept override;
           void set_element(wrapper::org::webRtc::MediaElementPtr value) noexcept override;
+          void resetSource() noexcept override;
 
           void wrapper_onObserverCountChanged(size_t count) noexcept override;
           void wrapper_onObserveronVideoFrameCountChanged(size_t count) noexcept override;
